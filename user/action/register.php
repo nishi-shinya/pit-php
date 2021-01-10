@@ -49,6 +49,11 @@ try {
         $stmt->bindParam(':email', $user_email);
         $stmt->bindParam(':password', $password);
         $stmt->execute();
+
+        $_SESSION = [
+            'name' => $user_name,
+            'id' => $database_handler->lastInsertId()
+        ];
     }
 } catch (Throwable $e) {
     echo $e->getMessage();

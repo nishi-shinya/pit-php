@@ -30,3 +30,46 @@
         header('Location: ../../login/');
         exit;
     }
+
+    $database_handler = getDatabaseConnection();
+
+    try {
+        $stmt = $database_handler->prepare('SELECT id, name, email, password FROM users WHERE email = :email');
+        $stmt->bindParam(':email', $user_email);
+        $stmt->execute();
+
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$user) {
+            $_SESSION['errors'] = [
+                'メールアドレスまたはパスワードが間違っています。'
+            ];
+
+            header('Location: ../../memo/');
+            exit();
+        }
+
+        $id = $user['id'];
+        $name = $user['name'];
+        $email = $user['email'];
+
+        if (password_verify($user_password, $user['password'])) {
+            $_SESSION['user'] = [
+                'name' => $name,
+                'email' => $email
+            ];
+
+            header('Location: ../../memo/');
+            exit();
+        } else {
+            $_SESSION['errors'] = [
+                'メールアドレスまたはパスワードが間違っています。'
+            ];
+            header('Location: ../../login/');
+            exit();
+        }
+
+    } catch (Throwable $e) {
+        echo $e->getMessage();
+        exit();
+    }
