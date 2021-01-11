@@ -1,8 +1,40 @@
+<?php
+require '../common/database.php';
+require '../common/auth.php';
+
+if (!isLogin()) {
+    header('Location: ../login/');
+    exit();
+}
+
+$user_name = getLoginUserName();
+$user_id = getLoginUserId();
+
+$memos = [];
+$database_handler = getDatabaseConnection();
+if ($stmt = $database_handler->prepare('SELECT * FROM memos WHERE user_id = :user_id ORDER BY updated_at DESC')) {
+    $stmt->bindParam('user_id', $user_id);
+    $stmt->execute();
+
+    while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $memos[] = $result;
+    }
+}
+
+$edit_id = '';
+if (isset($_SESSION['select_memo'])) {
+    $edit_memo = $_SESSION['select_memo'];
+    $edit_id = empty($edit_memo['id']) ? '' : $edit_memo['id'];
+    $edit_title = empty($edit_memo['title']) ? '' : $edit_memo['title'];
+    $edit_content = empty($edit_memo['content']) ? '' : $edit_memo['content'];
+}
+
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <?php
-include_once "../common/header.php";
-echo getHeader("メモ投稿");
+    include_once "../common/header.php";
+    echo getHeader("メモ投稿");
 ?>
 <body class="bg-white">
 <div class="h-100">
@@ -10,10 +42,10 @@ echo getHeader("メモ投稿");
         <div class="col-3 h-100 m-0 p-0 border-left border-right border-gray">
             <div class="left-memo-menu d-flex justify-content-between pt-2">
                 <div class="pl-3 pt-2">
-                    xxxさん、こんにちは。
+                    <?php echo $user_name; ?>さん、こんにちは。
                 </div>
                 <div class="pr-1">
-                    <a href="" class="btn btn-success"><i class="fas fa-plus"></i></a>
+                    <a href="./action/add.php" class="btn btn-success"><i class="fas fa-plus"></i></a>
                     <a href="../login/" class="btn btn-dark"><i class="fas fa-sign-out-alt"></i></a>
                 </div>
             </div>

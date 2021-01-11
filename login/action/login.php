@@ -55,6 +55,7 @@
 
         if (password_verify($user_password, $user['password'])) {
             $_SESSION['user'] = [
+                'id' => $id,
                 'name' => $name,
                 'email' => $email
             ];
